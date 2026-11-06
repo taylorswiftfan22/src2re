@@ -62,7 +62,7 @@ You need:
 - One Python package: [capstone](https://www.capstone-engine.org/), the disassembler it uses (tested on 5.0.7).
 
 ```bash
-git clone <this repo> source2-re
+git clone https://github.com/taylorswiftfan22/source-2-reversing-skill source2-re
 pip install capstone
 python source2-re/scripts/s2re.py -g cs2 info
 ```
@@ -470,4 +470,4 @@ involved.
 
 ## License
 
-Not chosen yet. Add a `LICENSE` file before publishing (MIT is the common choice for small tools like this).
+No license has been chosen yet.
