@@ -1,4 +1,4 @@
-"""source2-re tests. Run from the skill folder:  python -m unittest discover -s tests -v
+"""source2-re tests. Run from the repo root:  python -m unittest discover -s tests -v
 
 Three groups:
   Pure          pattern formats, address parsing, signature files, script rendering: no DLL needed

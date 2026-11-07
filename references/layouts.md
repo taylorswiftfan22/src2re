@@ -1,9 +1,25 @@
 # Layouts and anchors
 
-What the scripts assume about the binaries, and how each assumption was checked. "Verified" means checked against
-the DLLs on disk on 2026-11-05: CS2 client.dll 39227544 bytes (modified 2026-11-04 17:07), CS2 engine2.dll 7498392
-bytes (2026-11-04 00:47), Deadlock client.dll 60326552 bytes and engine2.dll 6394008 bytes (both 2026-10-28 20:30).
-`tests/test_s2re.py` pins the facts below that have exact values.
+> What the scripts assume about the binaries, and how each assumption was checked.
+
+"Verified" means checked against the DLLs on disk on 2026-11-05: CS2 client.dll 39227544 bytes (modified
+2026-11-04 17:07), CS2 engine2.dll 7498392 bytes (2026-11-04 00:47), Deadlock client.dll 60326552 bytes and
+engine2.dll 6394008 bytes (both 2026-10-28 20:30). `tests/test_s2re.py` pins the facts below that have exact
+values.
+
+## Contents
+
+- [PE / unwind (generic x64)](#pe--unwind-generic-x64)
+- [MSVC RTTI (x64)](#msvc-rtti-x64)
+- [Schema system: static SchemaClassInfoData_t](#schema-system-static-schemaclassinfodata_t)
+- [Schema system: static SchemaEnumInfoData_t](#schema-system-static-schemaenuminfodata_t)
+- [ConVars](#convars)
+- [ConCommands](#concommands)
+- [CreateInterface](#createinterface)
+- [Module dumps](#module-dumps)
+- [Embedded protobuf descriptors](#embedded-protobuf-descriptors)
+- [Patterns](#patterns)
+- [Anchors on specific builds](#anchors-on-specific-builds)
 
 ## PE / unwind (generic x64)
 
@@ -100,14 +116,14 @@ Verified: CS2 client.dll 265 enums (`MoveType_t`: 14 values, MOVETYPE_WALK = 2),
 
 ## ConVars
 
-- **Registration.** Each module has a registrar function, recognised by the string `RegisterConVar: Unknown error`
+- **Registration.** Each module has a registrar function, recognized by the string `RegisterConVar: Unknown error`
   it references. Static initializers call it (or small wrappers around it, < 0x300 bytes with 3+ callers) after
   `lea rdx, [name]` and `lea rcx, [object in .data]`, within 0x80 bytes before the call. The help text is another
   `.rdata` lea nearby (often absent). Example: CS2 `sv_jump_spam_penalty_time` init at 0xb20c0.
 - Counts: CS2 client.dll 1992, Deadlock client.dll 2227.
 - **Object spacing.** Objects are packed **0x10 apart** in both CS2 and Deadlock: `sv_ladder_dampen`, `sv_ladder_angle`
   and `sv_ladder_scale_speed` sit at 0x2537670 / 0x2537680 / 0x2537690. That is why references are counted from
-  obj+0..0xF only (`--span`). A 0x48 window reported the neighbours' initializers as readers.
+  obj+0..0xF only (`--span`). A 0x48 window reported the neighbors' initializers as readers.
 - **Readers.** Code reaches the value in one of two ways:
   - `lea rcx, [obj]` followed by a call (CS2 modern jump 0x8c4d90 with `sv_jump_spam_penalty_time`);
   - `mov rax, [obj+8]`, loading the object's data pointer (CS2 ladder move 0x8dd2a0 with `sv_ladder_dampen` /
@@ -162,7 +178,7 @@ CS2 engine2.dll, Windows kernel32.dll): mapped at their RVAs, DIR64 pointers reb
 - **dumpdiff.** The disk DLL is rebased to the dump's base and compared qword by qword. Code ranges are disassembled
   from the containing instruction on both sides; a `jmp` / `call` whose target is outside [0, SizeOfImage) is
   flagged. A changed qword inside an RTTI vtable in read-only data is a redirected slot. Writable sections are
-  runtime writes, labelled by the static object they fall in.
+  runtime writes, labeled by the static object they fall in.
 - **Assumed (needs a real dump):**
   - `.reloc` is mapped and intact in the dump (user-mode images keep discardable sections mapped). If it is zeroed,
     the relocations of `--headers-from` are used.
